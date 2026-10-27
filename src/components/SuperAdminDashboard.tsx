@@ -146,6 +146,42 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onBack
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold">Elenco Ristoranti Clienti & Abbonamenti</h3>
+            <button
+              onClick={() => {
+                const name = prompt('Nome del nuovo ristorante:');
+                if (name) {
+                  const newRest: RestaurantInfo = {
+                    id: name.toLowerCase().replace(/\s+/g, ''),
+                    name,
+                    tagline: 'Benvenuti nel nostro ristorante.',
+                    logo: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80',
+                    coverImage: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
+                    address: 'Indirizzo da inserire',
+                    phone: '',
+                    email: '',
+                    adminEmail: 'admin@' + name.toLowerCase().replace(/\s+/g, '') + '.it',
+                    adminPassword: 'password123',
+                    isOpen: true,
+                    openingHours: '12:00 - 23:00',
+                    currency: '€',
+                    googleReviewUrl: '',
+                    tripAdvisorUrl: '',
+                    subscription: {
+                      planName: 'Abbonamento Mensile',
+                      status: 'Attivo',
+                      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                      monthlyFee: 49,
+                    },
+                  };
+                  saveStoredRestaurantsList([...restaurants, newRest]);
+                  setRestaurants([...restaurants, newRest]);
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Nuovo Cliente
+            </button>
           </div>
 
           <div className="bg-zinc-900 rounded-3xl border border-zinc-800 overflow-hidden shadow-xl">

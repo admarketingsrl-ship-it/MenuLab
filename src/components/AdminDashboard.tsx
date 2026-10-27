@@ -81,11 +81,20 @@ export const AdminDashboard: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
+    const rest = getStoredRestaurant();
+    
+    // Check subscription expiration
+    if (rest.subscription && new Date(rest.subscription.endDate) < new Date()) {
+      setLoginError('Abbonamento scaduto. Contatta l\'agenzia per rinnovare l\'accesso.');
+      return;
+    }
+
+    // Check credentials
+    if (email === (rest.adminEmail || 'admin@menulab.it') && password === (rest.adminPassword || 'admin123')) {
       setIsLoggedIn(true);
       setLoginError('');
     } else {
-      setLoginError('Inserisci email e password validi.');
+      setLoginError('Credenziali non valide.');
     }
   };
 

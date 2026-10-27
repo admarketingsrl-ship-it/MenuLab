@@ -43,6 +43,8 @@ export interface RestaurantInfo {
   address: string;
   phone: string;
   email: string;
+  adminEmail?: string;
+  adminPassword?: string;
   isOpen: boolean;
   openingHours: string;
   currency: string;

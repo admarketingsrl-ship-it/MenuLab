@@ -9,7 +9,13 @@ import { getStoredRestaurant } from './services/store';
 import { RestaurantInfo } from './types';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'menu' | 'admin' | 'superadmin'>('landing');
+  const [currentView, setCurrentView] = useState<'landing' | 'menu' | 'admin' | 'superadmin'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+    if (view === 'menu' || params.has('table')) return 'menu';
+    if (view === 'admin') return 'admin';
+    return 'landing';
+  });
   const [restaurant, setRestaurant] = useState<RestaurantInfo>(getStoredRestaurant());
 
   useEffect(() => {
