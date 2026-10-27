@@ -3,8 +3,8 @@ import { INITIAL_DISHES, INITIAL_RESTAURANT, INITIAL_CATEGORIES } from '../data/
 
 const STORAGE_KEYS = {
   DISHES: 'menulab_dishes_v1',
-  RESTAURANTS: 'menulab_restaurants_list_v1',
-  CURRENT_RESTAURANT_ID: 'menulab_current_restaurant_id_v1',
+  RESTAURANTS: 'menulab_restaurants_list_v3',
+  CURRENT_RESTAURANT_ID: 'menulab_current_restaurant_id_v2',
   CATEGORIES: 'menulab_categories_v1',
   WAITER_CALLS: 'menulab_waiter_calls_v1',
   REVIEWS: 'menulab_reviews_v1',
@@ -21,11 +21,14 @@ export const INITIAL_RESTAURANTS_LIST: RestaurantInfo[] = [
     address: 'Corso Umberto I 112, Napoli',
     phone: '+39 081 777 9988',
     email: 'vesuvio@menulab.it',
+    adminEmail: 'admin@vesuvio.it',
+    adminPassword: 'vesuvio123',
     isOpen: true,
     openingHours: 'Lun - Dom: 18:30 - 00:00',
     currency: '€',
     googleReviewUrl: 'https://g.page/r/example',
     tripAdvisorUrl: 'https://www.tripadvisor.it',
+    tables: ['Tavolo 1', 'Tavolo 2', 'Tavolo 3', 'Tavolo 4', 'Tavolo 5', 'Terrazza Est'],
     subscription: {
       planName: 'Abbonamento Mensile Pro',
       status: 'Attivo',
@@ -51,16 +54,19 @@ export const INITIAL_RESTAURANTS_LIST: RestaurantInfo[] = [
     address: 'Molo Luise 5, Napoli',
     phone: '+39 081 999 4321',
     email: 'barchetta@menulab.it',
+    adminEmail: 'admin@barchetta.it',
+    adminPassword: 'barchetta123',
     isOpen: true,
     openingHours: 'Mar - Dom: 12:30 - 15:30 | 20:00 - 23:30',
     currency: '€',
     googleReviewUrl: 'https://g.page/r/example',
     tripAdvisorUrl: 'https://www.tripadvisor.it',
+    tables: ['Tavolo 1', 'Tavolo 2', 'Tavolo 3', 'Molo Vista Mare'],
     subscription: {
-      planName: 'Abbonamento Annuale VIP',
-      status: 'Attivo',
-      endDate: '2027-05-15',
-      monthlyFee: 39,
+      planName: 'Abbonamento Mensile Base',
+      status: 'In Scadenza',
+      endDate: '2026-10-31',
+      monthlyFee: 29,
     },
     promoPopup: {
       title: '🐟 Benvenuti al Porto!',
@@ -71,13 +77,55 @@ export const INITIAL_RESTAURANTS_LIST: RestaurantInfo[] = [
     coupons: [
       { id: 'cp1', code: 'PORTOPESCATO', discountPercent: 10, description: 'Sconto 10% menu mare', active: true }
     ]
+  },
+  {
+    id: 'bistrotsancarlo',
+    name: 'Bistrot San Carlo (Test Scaduto)',
+    tagline: 'Caffetteria gourmet e pranzi veloci.',
+    logo: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=300&q=80',
+    coverImage: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=1200&q=80',
+    address: 'Piazza Trieste e Trento 1, Napoli',
+    phone: '+39 081 222 3344',
+    email: 'sancarlo@menulab.it',
+    adminEmail: 'admin@sancarlo.it',
+    adminPassword: 'sancarlo123',
+    isOpen: false,
+    openingHours: 'Lun - Ven: 08:00 - 18:00',
+    currency: '€',
+    googleReviewUrl: '',
+    tripAdvisorUrl: '',
+    tables: ['Tavolo 1', 'Tavolo 2'],
+    subscription: {
+      planName: 'Abbonamento Mensile Base',
+      status: 'Scaduto',
+      endDate: '2026-10-20',
+      monthlyFee: 29,
+    },
   }
 ];
 
 export const getStoredRestaurantsList = (): RestaurantInfo[] => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.RESTAURANTS);
-    return data ? JSON.parse(data) : INITIAL_RESTAURANTS_LIST;
+    if (!data) return INITIAL_RESTAURANTS_LIST;
+    const parsed: RestaurantInfo[] = JSON.parse(data);
+    
+    // Auto-migrate in case old entries lacked adminEmail or subscription
+    const migrated = parsed.map(r => {
+      const match = INITIAL_RESTAURANTS_LIST.find(i => i.id === r.id);
+      return {
+        ...r,
+        adminEmail: r.adminEmail || match?.adminEmail || `admin@${r.id}.it`,
+        adminPassword: r.adminPassword || match?.adminPassword || 'password123',
+        subscription: r.subscription || match?.subscription || {
+          planName: 'Abbonamento Mensile',
+          status: 'Attivo',
+          endDate: '2026-12-31',
+          monthlyFee: 49,
+        },
+      };
+    });
+    return migrated;
   } catch {
     return INITIAL_RESTAURANTS_LIST;
   }
@@ -86,6 +134,13 @@ export const getStoredRestaurantsList = (): RestaurantInfo[] => {
 export const saveStoredRestaurantsList = (list: RestaurantInfo[]) => {
   localStorage.setItem(STORAGE_KEYS.RESTAURANTS, JSON.stringify(list));
   window.dispatchEvent(new Event('menulab_data_updated'));
+};
+
+export const resetToDefaultRestaurants = (): RestaurantInfo[] => {
+  localStorage.setItem(STORAGE_KEYS.RESTAURANTS, JSON.stringify(INITIAL_RESTAURANTS_LIST));
+  localStorage.setItem(STORAGE_KEYS.CURRENT_RESTAURANT_ID, INITIAL_RESTAURANTS_LIST[0].id);
+  window.dispatchEvent(new Event('menulab_data_updated'));
+  return INITIAL_RESTAURANTS_LIST;
 };
 
 export const getStoredRestaurant = (): RestaurantInfo => {

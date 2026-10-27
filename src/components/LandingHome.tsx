@@ -3,7 +3,7 @@ import { QrCode, LayoutDashboard, FileSpreadsheet, Bell, Smartphone, Sparkles, A
 import { RestaurantInfo } from '../types';
 
 interface LandingHomeProps {
-  onNavigate: (view: 'landing' | 'menu' | 'admin') => void;
+  onNavigate: (view: 'landing' | 'menu' | 'admin' | 'superadmin') => void;
   restaurant: RestaurantInfo;
 }
 
@@ -30,19 +30,27 @@ export const LandingHome: React.FC<LandingHomeProps> = ({ onNavigate, restaurant
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => onNavigate('menu')}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-base flex items-center justify-center gap-3 shadow-xl shadow-amber-500/25 transition-all transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-base flex items-center justify-center gap-3 shadow-xl shadow-amber-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer"
             >
               <Smartphone className="w-5 h-5" />
-              Prova il Menu Digitale (Cliente)
+              Menu Cliente (QR)
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               onClick={() => onNavigate('admin')}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 font-extrabold text-base flex items-center justify-center gap-3 shadow-lg transition-all transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 font-extrabold text-base flex items-center justify-center gap-3 shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer"
             >
               <LayoutDashboard className="w-5 h-5" />
-              Accedi alla Dashboard Admin
+              Dashboard Ristoratore
+            </button>
+
+            <button
+              onClick={() => onNavigate('superadmin')}
+              className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-black text-base flex items-center justify-center gap-2 border-2 border-amber-500/30 transition-all cursor-pointer"
+            >
+              <ShieldCheck className="w-5 h-5" />
+              SuperAdmin Agenzia
             </button>
           </div>
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, UtensilsCrossed, FileSpreadsheet, Bell, QrCode, Settings, 
   Plus, Edit3, Trash2, CheckCircle, AlertCircle, LogOut, Search, Sparkles, 
-  Check, Save, RefreshCw, Printer, ShieldCheck, HardDrive, CloudUpload, DownloadCloud, Tag, Percent, Copy, ExternalLink 
+  Check, Save, RefreshCw, Printer, ShieldCheck, ShieldAlert, HardDrive, CloudUpload, DownloadCloud, Tag, Percent, Copy, ExternalLink 
 } from 'lucide-react';
 import { Dish, RestaurantInfo, WaiterCall, ReviewItem, CouponCode } from '../types';
 import { 
@@ -17,7 +17,11 @@ import { googleSignInWithDrive, getAccessToken, logoutUser, initAuth } from '../
 import { exportMenuToGoogleDrive, listMenuBackupsFromGoogleDrive, downloadMenuFromGoogleDrive, DriveFileItem } from '../services/drive';
 import { User } from 'firebase/auth';
 
-export const AdminDashboard: React.FC = () => {
+interface AdminDashboardProps {
+  onNavigateToSuperAdmin?: () => void;
+}
+
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateToSuperAdmin }) => {
   // Auth state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [email, setEmail] = useState('admin@menulab.it');
@@ -293,7 +297,56 @@ export const AdminDashboard: React.FC = () => {
     saveStoredRestaurant(updatedRest);
   };
 
+  // Check subscription expiration
+  const isSubscriptionExpired = (restaurant.subscription?.status === 'Scaduto') || 
+    (restaurant.subscription?.endDate && new Date(restaurant.subscription.endDate) < new Date());
+
   if (!isLoggedIn) {
+    if (isSubscriptionExpired) {
+      return (
+        <div className="min-h-[85vh] flex items-center justify-center p-4 bg-zinc-50 dark:bg-zinc-950">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 max-w-md w-full shadow-2xl border border-red-200 dark:border-red-900/50 space-y-6 text-center">
+            <div className="w-16 h-16 rounded-3xl bg-red-100 dark:bg-red-950/60 text-red-500 flex items-center justify-center mx-auto border border-red-200 dark:border-red-800">
+              <ShieldAlert className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="px-3 py-1 rounded-full text-xs font-black bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 uppercase">
+                Accesso Portale Bloccato
+              </span>
+              <h2 className="text-2xl font-black text-zinc-900 dark:text-white">{restaurant.name}</h2>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                L'abbonamento mensile a MenuLab per questo ristorante è <strong>scaduto il {restaurant.subscription?.endDate || 'recente'}</strong> o è stato sospeso dall'agenzia.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 text-left text-xs space-y-1.5">
+              <p className="text-zinc-500 font-semibold">Dettagli Abbonamento:</p>
+              <p className="font-bold text-zinc-900 dark:text-white">Piano: {restaurant.subscription?.planName || 'Mensile Standard'}</p>
+              <p className="text-red-600 dark:text-red-400 font-semibold">Stato: Abbonamento Bloccato / Scaduto</p>
+              <p className="text-zinc-400 text-[11px]">Canone: €{restaurant.subscription?.monthlyFee || 49}/mese</p>
+              <p className="text-zinc-400 text-[11px] font-mono">Data Scadenza: {restaurant.subscription?.endDate || 'N/D'}</p>
+            </div>
+
+            {onNavigateToSuperAdmin && (
+              <button
+                type="button"
+                onClick={onNavigateToSuperAdmin}
+                className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Apri Pannello SuperAdmin per Sbloccare
+              </button>
+            )}
+
+            <p className="text-[11px] text-zinc-500">
+              Contatta la tua agenzia partner per rinnovare il servizio e riattivare l'accesso alla gestione del menu.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-[85vh] flex items-center justify-center p-4 bg-zinc-50 dark:bg-zinc-950">
         <div className="bg-white dark:bg-zinc-900 rounded-3xl p-8 max-w-md w-full shadow-2xl border border-zinc-200 dark:border-zinc-800 space-y-6">
@@ -301,8 +354,13 @@ export const AdminDashboard: React.FC = () => {
             <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-amber-500/30">
               <ShieldCheck className="w-7 h-7" />
             </div>
-            <h2 className="text-2xl font-black">Dashboard Ristoratore</h2>
-            <p className="text-xs text-zinc-500">Accesso riservato con Firebase Auth e Google Drive Sync</p>
+            <h2 className="text-2xl font-black">{restaurant.name}</h2>
+            <p className="text-xs text-zinc-500">Accesso Gestione Ristoratore</p>
+            {restaurant.subscription && (
+              <span className="inline-block px-3 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
+                {restaurant.subscription.planName} • Scade il {restaurant.subscription.endDate}
+              </span>
+            )}
           </div>
 
           {loginError && (
@@ -336,14 +394,28 @@ export const AdminDashboard: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-lg shadow-amber-500/25 transition-all"
+              className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-lg shadow-amber-500/25 transition-all cursor-pointer"
             >
               Accedi alla Dashboard
             </button>
           </form>
 
-          <div className="text-center pt-2 border-t border-zinc-100 dark:border-zinc-800">
-            <p className="text-[11px] text-zinc-400">Credenziali precompilate per test immediato.</p>
+          <div className="text-center pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5">
+            <p className="text-[11px] text-zinc-400">
+              Credenziali attive per {restaurant.name}:
+            </p>
+            <p className="text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400">
+              {restaurant.adminEmail || 'admin@bellanapoli.it'} / {restaurant.adminPassword || 'admin123'}
+            </p>
+            {onNavigateToSuperAdmin && (
+              <button
+                type="button"
+                onClick={onNavigateToSuperAdmin}
+                className="text-[11px] text-amber-500 hover:text-amber-600 font-bold underline cursor-pointer block mx-auto pt-1"
+              >
+                Pannello SuperAdmin Agenzia (Gestione Ristoranti e Scadenze) ➔
+              </button>
+            )}
           </div>
         </div>
       </div>

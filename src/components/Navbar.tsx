@@ -67,6 +67,19 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, restaur
             <LayoutDashboard className="w-4 h-4 text-orange-500" />
             <span>Dashboard Admin</span>
           </button>
+
+          <button
+            onClick={() => onNavigate('superadmin')}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+              currentView === 'superadmin'
+                ? 'bg-amber-500 text-zinc-950 border-amber-400 shadow-sm'
+                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 hover:bg-amber-500/20'
+            }`}
+            title="Pannello Gestione Agenzia & Abbonamenti"
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span>SuperAdmin Agenzia</span>
+          </button>
         </nav>
       </div>
     </header>

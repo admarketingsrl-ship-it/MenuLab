@@ -12,6 +12,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<'landing' | 'menu' | 'admin' | 'superadmin'>(() => {
     const params = new URLSearchParams(window.location.search);
     const view = params.get('view');
+    if (view === 'superadmin') return 'superadmin';
     if (view === 'menu' || params.has('table')) return 'menu';
     if (view === 'admin') return 'admin';
     return 'landing';
@@ -26,20 +27,11 @@ export default function App() {
     return () => window.removeEventListener('menulab_data_updated', handleUpdate);
   }, []);
 
-  if (currentView === 'superadmin') {
-    return (
-      <SuperAdminDashboard
-        onBackToApp={() => setCurrentView('landing')}
-        onSelectRestaurant={() => setCurrentView('menu')}
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500 selection:text-white flex flex-col justify-between">
       <div>
         <Navbar
-          currentView={currentView as 'landing' | 'menu' | 'admin'}
+          currentView={currentView}
           onNavigate={setCurrentView}
           restaurantName={restaurant.name}
         />
@@ -52,7 +44,17 @@ export default function App() {
             <PublicMenu />
           )}
           {currentView === 'admin' && (
-            <AdminDashboard />
+            <AdminDashboard onNavigateToSuperAdmin={() => setCurrentView('superadmin')} />
+          )}
+          {currentView === 'superadmin' && (
+            <SuperAdminDashboard
+              onBackToApp={() => setCurrentView('landing')}
+              onNavigateView={setCurrentView}
+              onSelectRestaurant={(restId) => {
+                setRestaurant(getStoredRestaurant());
+                setCurrentView('admin');
+              }}
+            />
           )}
         </main>
       </div>
