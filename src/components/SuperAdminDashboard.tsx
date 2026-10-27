@@ -327,7 +327,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onBack
       )}
 
       {/* SuperAdmin Top Header */}
-      <div className="bg-zinc-900 border-b border-zinc-800 py-6 px-4 sm:px-8 sticky top-16 z-30 backdrop-blur-md bg-zinc-900/95">
+      <div className="bg-zinc-900 border-b border-zinc-800 py-6 px-4 sm:px-8 sticky top-0 z-30 backdrop-blur-md bg-zinc-900/95">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-black shadow-lg shadow-amber-500/25">
@@ -364,16 +364,47 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onBack
 
             <button
               onClick={onBackToApp}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Esci
+              Torna al Sito Pubblico
             </button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
+        
+        {/* Dedicated Secret Agency URL Banner */}
+        <div className="bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-zinc-900/40 p-5 rounded-3xl border border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+          <div className="space-y-1.5 max-w-3xl">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-zinc-950 uppercase tracking-wide">
+                Link Segreto Riservato Agenzia
+              </span>
+              <span className="text-xs text-amber-400 font-bold">Invisibile sul sito pubblico</span>
+            </div>
+            <p className="text-xs text-zinc-300">
+              Salva questo URL nei segnalibri del browser per accedere alla gestione clienti, credenziali e scadenze mensili in qualsiasi momento.
+            </p>
+            <div className="flex items-center gap-2 pt-1">
+              <code className="text-xs font-mono text-amber-300 bg-zinc-950/80 px-3 py-1.5 rounded-xl border border-zinc-800 break-all select-all">
+                {typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}?view=superadmin` : '?view=superadmin'}
+              </code>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}${window.location.pathname}?view=superadmin`;
+              copyToClipboard(url, 'Link Riservato Agenzia');
+            }}
+            className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+          >
+            <Copy className="w-4 h-4" />
+            Copia Link Agenzia
+          </button>
+        </div>
         
         {/* KPI Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

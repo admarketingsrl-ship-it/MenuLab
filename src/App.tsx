@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navbar';
 import { LandingHome } from './components/LandingHome';
 import { PublicMenu } from './components/PublicMenu';
@@ -9,15 +9,57 @@ import { getStoredRestaurant } from './services/store';
 import { RestaurantInfo } from './types';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'menu' | 'admin' | 'superadmin'>(() => {
+  const getInitialView = (): 'landing' | 'menu' | 'admin' | 'superadmin' => {
     const params = new URLSearchParams(window.location.search);
-    const view = params.get('view');
-    if (view === 'superadmin') return 'superadmin';
-    if (view === 'menu' || params.has('table')) return 'menu';
-    if (view === 'admin') return 'admin';
+    const hash = window.location.hash.toLowerCase();
+    const pathname = window.location.pathname.toLowerCase();
+
+    if (
+      params.get('view') === 'superadmin' ||
+      params.get('view') === 'agency' ||
+      params.has('agency') ||
+      pathname.endsWith('/agency') ||
+      pathname.endsWith('/superadmin') ||
+      hash === '#/agency' ||
+      hash === '#/superadmin' ||
+      hash === '#agency'
+    ) {
+      return 'superadmin';
+    }
+    if (params.get('view') === 'menu' || params.has('table') || hash === '#/menu') return 'menu';
+    if (params.get('view') === 'admin' || hash === '#/admin') return 'admin';
     return 'landing';
-  });
+  };
+
+  const [currentView, setCurrentView] = useState<'landing' | 'menu' | 'admin' | 'superadmin'>(getInitialView);
   const [restaurant, setRestaurant] = useState<RestaurantInfo>(getStoredRestaurant());
+
+  const handleNavigate = useCallback((view: 'landing' | 'menu' | 'admin' | 'superadmin') => {
+    setCurrentView(view);
+    const url = new URL(window.location.href);
+    if (view === 'superadmin') {
+      url.searchParams.set('view', 'superadmin');
+    } else if (view === 'menu') {
+      url.searchParams.set('view', 'menu');
+    } else if (view === 'admin') {
+      url.searchParams.set('view', 'admin');
+    } else {
+      url.searchParams.delete('view');
+    }
+    window.history.pushState({}, '', url.toString());
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentView(getInitialView());
+    };
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
+  }, []);
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -27,39 +69,43 @@ export default function App() {
     return () => window.removeEventListener('menulab_data_updated', handleUpdate);
   }, []);
 
+  // When visiting via the dedicated agency URL, render the full-screen agency portal
+  if (currentView === 'superadmin') {
+    return (
+      <SuperAdminDashboard
+        onBackToApp={() => handleNavigate('landing')}
+        onNavigateView={handleNavigate}
+        onSelectRestaurant={(restId) => {
+          setRestaurant(getStoredRestaurant());
+          handleNavigate('admin');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500 selection:text-white flex flex-col justify-between">
       <div>
         <Navbar
           currentView={currentView}
-          onNavigate={setCurrentView}
+          onNavigate={handleNavigate}
           restaurantName={restaurant.name}
         />
 
         <main>
           {currentView === 'landing' && (
-            <LandingHome onNavigate={setCurrentView} restaurant={restaurant} />
+            <LandingHome onNavigate={handleNavigate} restaurant={restaurant} />
           )}
           {currentView === 'menu' && (
             <PublicMenu />
           )}
           {currentView === 'admin' && (
-            <AdminDashboard onNavigateToSuperAdmin={() => setCurrentView('superadmin')} />
-          )}
-          {currentView === 'superadmin' && (
-            <SuperAdminDashboard
-              onBackToApp={() => setCurrentView('landing')}
-              onNavigateView={setCurrentView}
-              onSelectRestaurant={(restId) => {
-                setRestaurant(getStoredRestaurant());
-                setCurrentView('admin');
-              }}
-            />
+            <AdminDashboard onNavigateToSuperAdmin={() => handleNavigate('superadmin')} />
           )}
         </main>
       </div>
 
-      <Footer onOpenSuperAdmin={() => setCurrentView('superadmin')} />
+      <Footer onOpenSuperAdmin={() => handleNavigate('superadmin')} />
     </div>
   );
 }

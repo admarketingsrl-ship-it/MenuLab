@@ -328,16 +328,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateToSupe
               <p className="text-zinc-400 text-[11px] font-mono">Data Scadenza: {restaurant.subscription?.endDate || 'N/D'}</p>
             </div>
 
-            {onNavigateToSuperAdmin && (
-              <button
-                type="button"
-                onClick={onNavigateToSuperAdmin}
-                className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                Apri Pannello SuperAdmin per Sbloccare
-              </button>
-            )}
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center">
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-bold">Assistenza & Rinnovi</p>
+              <p className="text-[11px] text-zinc-500 mt-0.5">Email: support@menulab.it • Tel: +39 081 000 0000</p>
+            </div>
 
             <p className="text-[11px] text-zinc-500">
               Contatta la tua agenzia partner per rinnovare il servizio e riattivare l'accesso alla gestione del menu.
@@ -400,22 +394,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateToSupe
             </button>
           </form>
 
-          <div className="text-center pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5">
+          <div className="text-center pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-1">
             <p className="text-[11px] text-zinc-400">
               Credenziali attive per {restaurant.name}:
             </p>
             <p className="text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400">
               {restaurant.adminEmail || 'admin@bellanapoli.it'} / {restaurant.adminPassword || 'admin123'}
             </p>
-            {onNavigateToSuperAdmin && (
-              <button
-                type="button"
-                onClick={onNavigateToSuperAdmin}
-                className="text-[11px] text-amber-500 hover:text-amber-600 font-bold underline cursor-pointer block mx-auto pt-1"
-              >
-                Pannello SuperAdmin Agenzia (Gestione Ristoranti e Scadenze) ➔
-              </button>
-            )}
           </div>
         </div>
       </div>

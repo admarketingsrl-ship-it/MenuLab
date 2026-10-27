@@ -44,14 +44,6 @@ export const LandingHome: React.FC<LandingHomeProps> = ({ onNavigate, restaurant
               <LayoutDashboard className="w-5 h-5" />
               Dashboard Ristoratore
             </button>
-
-            <button
-              onClick={() => onNavigate('superadmin')}
-              className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-black text-base flex items-center justify-center gap-2 border-2 border-amber-500/30 transition-all cursor-pointer"
-            >
-              <ShieldCheck className="w-5 h-5" />
-              SuperAdmin Agenzia
-            </button>
           </div>
 
           {/* Active Demo Restaurant Badge */}
